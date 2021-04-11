@@ -5,20 +5,20 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const errorHandler = require("./handlers/error");
 const authRoutes = require("./routes/auth");
-const weatherRoutes = require("./routes/weather");
+const searchesRoutes = require("./routes/searches");
 const { loginRequired, ensureCorrectUser } = require("./middleware/auth");
 const db = require("./models");
-const PORT = 8081;
+const PORT = process.env.PORT || 8081;
 
 app.use(cors());
 app.use(bodyParser.json());
 
 app.use("/api/auth", authRoutes);
 app.use(
-  "/api/users/:id/history",
-  //loginRequired,
-  //ensureCorrectUser,
-  weatherRoutes
+  "/api/users/:id/searches",
+  loginRequired,
+  ensureCorrectUser,
+  searchesRoutes
 );
 
 app.use(function (req, res, next) {

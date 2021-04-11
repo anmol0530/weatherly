@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("./user");
 
-const weatherHistorySchema = new mongoose.Schema(
+const searchSchema = new mongoose.Schema(
   {
     weather: String,
     city: {
@@ -15,8 +15,9 @@ const weatherHistorySchema = new mongoose.Schema(
     temp: Number,
     temp_max: Number,
     temp_min: Number,
-    sunrise: Date,
-    sunset: Date,
+    sunrise: Number,
+    sunset: Number,
+    timezone: Number,
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -27,10 +28,10 @@ const weatherHistorySchema = new mongoose.Schema(
   }
 );
 
-weatherHistorySchema.pre("remove", async function (next) {
+searchSchema.pre("remove", async function (next) {
   try {
     let user = await User.findById(this.user);
-    user.history.remove(this.id);
+    user.searches.remove(this.id);
     await user.save();
     return next();
   } catch (err) {
@@ -38,5 +39,5 @@ weatherHistorySchema.pre("remove", async function (next) {
   }
 });
 
-const History = mongoose.model("History", weatherHistorySchema);
-module.exports = History;
+const Search = mongoose.model("Search", searchSchema);
+module.exports = Search;

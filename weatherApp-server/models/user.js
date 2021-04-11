@@ -5,40 +5,42 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   username: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   profileImageUrl: {
-    type: String
+    type: String,
   },
   mobile: {
     type: Number,
     required: true,
-    unique: true
+    unique: true,
   },
   city: {
     type: String,
-    required: true
+    required: true,
   },
   country: {
     type: String,
-    required: true
+    required: true,
   },
-  history: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'History'
-  }]
+  searches: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Search",
+    },
+  ],
 });
 
-userSchema.pre("save", async function(next) {
+userSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) {
       return next();
@@ -51,7 +53,7 @@ userSchema.pre("save", async function(next) {
   }
 });
 
-userSchema.methods.comparePassword = async function(candidatePassword, next) {
+userSchema.methods.comparePassword = async function (candidatePassword, next) {
   try {
     let isMatch = await bcrypt.compare(candidatePassword, this.password);
     return isMatch;

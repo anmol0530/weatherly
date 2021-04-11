@@ -2,7 +2,7 @@ const { response } = require("express");
 const db = require("../models");
 const fetch = require("node-fetch");
 
-exports.currentWeather = async function (req, res, next) {
+exports.createSearch = async function (req, res, next) {
   try {
     //console.log(req.body);
     let city = req.body.city;
@@ -13,7 +13,7 @@ exports.currentWeather = async function (req, res, next) {
     const json = await fetch_response.json();
     console.log(json);
 
-    let history = await db.History.create({
+    let search = await db.Search.create({
       weather: json.weather[0].description,
       city: req.body.city,
       country: req.body.country,
@@ -22,47 +22,48 @@ exports.currentWeather = async function (req, res, next) {
       temp_min: json.main.temp_min,
       sunrise: json.sys.sunrise,
       sunset: json.sys.sunset,
+      timezone: json.timezone,
       user: req.params.id,
     });
     let foundUser = await db.User.findById(req.params.id);
-    foundUser.history.push(history.id);
+    foundUser.searches.push(search.id);
     await foundUser.save();
-    let foundHistory = await db.History.findById(history._id).populate("user", {
+    let foundSearch = await db.Search.findById(search._id).populate("user", {
       username: true,
       profileImageUrl: true,
     });
 
-    return res.status(200).json(foundHistory);
+    return res.status(200).json(foundSearch);
   } catch (err) {
     return next(err);
   }
 };
 
-exports.getHistory = async function (req, res, next) {
+exports.getSearch = async function (req, res, next) {
   try {
-    let history = await db.History.findById(req.params.history_id);
-    return res.status(200).json(history);
+    let search = await db.Search.findById(req.params.search_id);
+    return res.status(200).json(search);
   } catch (err) {
     return next(err);
   }
 };
 
-exports.deleteHistory = async function (req, res, next) {
+exports.deleteSearch = async function (req, res, next) {
   try {
-    let history = await db.History.findById(req.params.history_id);
-    await history.remove();
-    return res.status(200).json(history);
+    let foundSearch = await db.Search.findById(req.params.search_id);
+    await foundSearch.remove();
+    return res.status(200).json(foundSearch);
   } catch (err) {
     return next(err);
   }
 };
 
-exports.totalHistory = async function (req, res, next) {
+exports.allSearches = async function (req, res, next) {
   try {
-    let userHistory = await db.History.find({ user: req.params.id }).sort({
+    let allSearches = await db.Search.find({ user: req.params.id }).sort({
       createdAt: "desc",
     });
-    return res.status(200).json(userHistory);
+    return res.status(200).json(allSearches);
   } catch (err) {
     return next(err);
   }
